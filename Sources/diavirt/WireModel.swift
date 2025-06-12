@@ -13,8 +13,8 @@ protocol WireEvent: Codable {
     func toUserMessage() -> String?
 }
 
-protocol WireProtocol {
-    func writeProtocolEvent<T: WireEvent>(_ event: T)
+protocol WireProtocol: Sendable {
+    func writeProtocolEvent(_ event: some WireEvent)
     func trackInputPipe(_ pipe: Pipe, tag: String)
     func trackOutputPipe(_ pipe: Pipe, tag: String)
     func trackDiskAllocated(allocated: Bool)

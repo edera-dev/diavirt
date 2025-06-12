@@ -8,7 +8,7 @@
 import Foundation
 import Virtualization
 
-class DAVirtualMachine: NSObject, WireProtocol, VZVirtualMachineDelegate {
+class DAVirtualMachine: NSObject, WireProtocol, VZVirtualMachineDelegate, @unchecked Sendable {
     let configuration: DAVirtualMachineConfiguration
     let enableWireProtocol: Bool
 
