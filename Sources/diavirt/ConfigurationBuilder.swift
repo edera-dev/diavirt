@@ -642,6 +642,10 @@ extension DAKeyboardDevice {
             device = try usbKeyboardDevice.build()
         }
 
+        if let macKeyboardDevice {
+            device = try macKeyboardDevice.build()
+        }
+
         return device!
     }
 }
@@ -649,6 +653,12 @@ extension DAKeyboardDevice {
 extension DAUSBKeyboardDevice {
     func build() throws -> VZUSBKeyboardConfiguration {
         VZUSBKeyboardConfiguration()
+    }
+}
+
+extension DAMacKeyboardDevice {
+    func build() throws -> VZMacKeyboardConfiguration {
+        VZMacKeyboardConfiguration()
     }
 }
 
@@ -660,6 +670,10 @@ extension DAPointingDevice {
             device = try usbScreenCoordinatePointingDevice.build()
         }
 
+        if let macTrackpadDevice {
+            device = try macTrackpadDevice.build()
+        }
+
         return device!
     }
 }
@@ -667,6 +681,12 @@ extension DAPointingDevice {
 extension DAUSBScreenCoordinatePointingDevice {
     func build() throws -> VZUSBScreenCoordinatePointingDeviceConfiguration {
         VZUSBScreenCoordinatePointingDeviceConfiguration()
+    }
+}
+
+extension DAMacTrackpadDevice {
+    func build() throws -> VZMacTrackpadConfiguration {
+        VZMacTrackpadConfiguration()
     }
 }
 
