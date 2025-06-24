@@ -48,5 +48,6 @@ struct VirtualMachineView: NSViewRepresentable {
     func updateNSView(_ view: VZVirtualMachineView, context _: Context) {
         view.virtualMachine = virtualMachine
         view.capturesSystemKeys = true
+        view.automaticallyReconfiguresDisplay = true
     }
 }
