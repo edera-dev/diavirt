@@ -23,7 +23,6 @@ enum UtmCompatibility {
 
     static func configuration(for vm: URL) throws -> DAVirtualMachineConfiguration? {
         let configURL = vm.appendingPathComponent("config.plist")
-        print(configURL)
         let configData = try Data(contentsOf: configURL)
         let config = try PropertyListDecoder().decode(UtmConfig.self, from: configData)
 
