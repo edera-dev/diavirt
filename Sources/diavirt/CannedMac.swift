@@ -7,7 +7,6 @@
 
 import Foundation
 
-#if arch(arm64)
 func createCannedMac() -> DAVirtualMachineConfiguration {
     DAVirtualMachineConfiguration(
         cpuCoreCount: 4,
@@ -26,7 +25,8 @@ func createCannedMac() -> DAVirtualMachineConfiguration {
         ),
         storageDevices: [
             .init(
-                virtioBlockDevice: .init(),
+                virtioBlockDevice: .init(blockDeviceIdentifier: ""),
+                nvmeBlockDevice: nil,
                 usbMassStorageDevice: .init(),
                 diskImageAttachment: .init(
                     imageFilePath: "root.img",
@@ -46,7 +46,8 @@ func createCannedMac() -> DAVirtualMachineConfiguration {
         networkDevices: [
             .init(
                 virtioNetworkDevice: .init(macAddress: nil),
-                natNetworkAttachment: .init()
+                natNetworkAttachment: .init(),
+                bridgedNetworkAttachment: nil,
             )
         ],
         graphicsDevices: [
@@ -80,12 +81,14 @@ func createCannedMac() -> DAVirtualMachineConfiguration {
         socketDevices: [],
         keyboardDevices: [
             .init(
-                usbKeyboardDevice: .init()
+                usbKeyboardDevice: .init(),
+                macKeyboardDevice: nil,
             )
         ],
         pointingDevices: [
             .init(
-                usbScreenCoordinatePointingDevice: .init()
+                usbScreenCoordinatePointingDevice: .init(),
+                macTrackpadDevice: nil,
             )
         ],
         macRestoreImage: .init(
@@ -95,4 +98,3 @@ func createCannedMac() -> DAVirtualMachineConfiguration {
         startOptions: .init()
     )
 }
-#endif

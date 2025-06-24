@@ -10,7 +10,7 @@ import Foundation
 enum UtmCompatibility {
     static func url(path: String) -> URL? {
         if path.contains("/") || path.hasSuffix(".utm") {
-            return URL(string: path)
+            return URL(filePath: path)
         }
 
         let home = FileManager.default.homeDirectoryForCurrentUser.path()
@@ -23,9 +23,8 @@ enum UtmCompatibility {
 
     static func configuration(for vm: URL) throws -> DAVirtualMachineConfiguration? {
         let configURL = vm.appendingPathComponent("config.plist")
-        guard let configData = try? Data(contentsOf: configURL) else {
-            return nil
-        }
+        print(configURL)
+        let configData = try Data(contentsOf: configURL)
         let config = try PropertyListDecoder().decode(UtmConfig.self, from: configData)
 
         var cpuCoreCount = config.system.cpuCount
@@ -73,27 +72,35 @@ enum UtmCompatibility {
         var pointing: [DAPointingDevice] = []
 
         for drive in config.drives {
-            let path = Self.dataPath(for: drive.imageName, vm: vm)
+            var attachment: DADiskImageAttachment?
+
+            if let imageName = drive.imageName {
+                let path = Self.dataPath(for: imageName, vm: vm)
+                attachment = DADiskImageAttachment(
+                    imageFilePath: path,
+                    isReadOnly: drive.isReadOnly,
+                    autoCreateSizeInBytes: nil
+                )
+            }
+
+            if attachment == nil {
+                continue
+            }
+
             if drive.isNvme {
                 storage.append(DAStorageDevice(
                     virtioBlockDevice: nil,
+                    nvmeBlockDevice: DANvmeBlockDevice(),
                     usbMassStorageDevice: nil,
-                    diskImageAttachment: DADiskImageAttachment(
-                        imageFilePath: path,
-                        isReadOnly: drive.isReadOnly,
-                        autoCreateSizeInBytes: nil
-                    ),
+                    diskImageAttachment: attachment,
                     networkBlockDeviceAttachment: nil,
                 ))
             } else {
                 storage.append(DAStorageDevice(
-                    virtioBlockDevice: DAVirtioBlockDevice(),
+                    virtioBlockDevice: DAVirtioBlockDevice(blockDeviceIdentifier: nil),
+                    nvmeBlockDevice: nil,
                     usbMassStorageDevice: nil,
-                    diskImageAttachment: DADiskImageAttachment(
-                        imageFilePath: path,
-                        isReadOnly: drive.isReadOnly,
-                        autoCreateSizeInBytes: nil
-                    ),
+                    diskImageAttachment: attachment,
                     networkBlockDeviceAttachment: nil,
                 ))
             }
@@ -118,21 +125,34 @@ enum UtmCompatibility {
         }
 
         switch config.virtualization.keyboard {
+        case "Generic":
+            keyboards.append(DAKeyboardDevice(usbKeyboardDevice: DAUSBKeyboardDevice(), macKeyboardDevice: nil))
+        case "Mac":
+            keyboards.append(DAKeyboardDevice(usbKeyboardDevice: nil, macKeyboardDevice: DAMacKeyboardDevice()))
+        case "Disabled":
+            break
         default:
-            keyboards.append(DAKeyboardDevice(usbKeyboardDevice: DAUSBKeyboardDevice()))
+            fatalError("keyboard backend \(config.virtualization.keyboard) not supported")
         }
 
         switch config.virtualization.pointer {
+        case "Mouse":
+            pointing.append(DAPointingDevice(usbScreenCoordinatePointingDevice: DAUSBScreenCoordinatePointingDevice(), macTrackpadDevice: nil))
+        case "Trackpad":
+            pointing.append(DAPointingDevice(usbScreenCoordinatePointingDevice: nil, macTrackpadDevice: DAMacTrackpadDevice()))
+        case "Disabled":
+            break
         default:
-            pointing.append(DAPointingDevice(usbScreenCoordinatePointingDevice: DAUSBScreenCoordinatePointingDevice()))
+            fatalError("pointing device backend \(config.virtualization.pointer) not supported")
         }
 
         for net in config.networks {
             let device: DANetworkDevice
             switch net.mode {
             case "Shared":
-                device = DANetworkDevice(virtioNetworkDevice: DAVirtioNetworkDevice(macAddress: net.macAddress), natNetworkAttachment: DANATNetworkAttachment())
-
+                device = DANetworkDevice(virtioNetworkDevice: DAVirtioNetworkDevice(macAddress: net.macAddress), natNetworkAttachment: DANATNetworkAttachment(), bridgedNetworkAttachment: nil)
+            case "Bridged":
+                device = DANetworkDevice(virtioNetworkDevice: DAVirtioNetworkDevice(macAddress: net.macAddress), natNetworkAttachment: nil, bridgedNetworkAttachment: DABridgedNetworkAttachment(interface: net.bridgeInterface!))
             default:
                 fatalError("invalid utm network mode: \(net.mode)")
             }
@@ -157,9 +177,6 @@ enum UtmCompatibility {
             macRestoreImage: nil,
             startOptions: nil
         )
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.withoutEscapingSlashes, .prettyPrinted]
-        print(String(data: try! encoder.encode(configuration), encoding: .utf8)!)
         return configuration
     }
 }

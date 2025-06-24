@@ -12,10 +12,8 @@ class DAVirtualMachine: NSObject, WireProtocol, VZVirtualMachineDelegate, @unche
     let configuration: DAVirtualMachineConfiguration
     let enableWireProtocol: Bool
 
-    #if arch(arm64)
     let enableInstallerMode: Bool
     let autoInstallerMode: Bool
-    #endif
 
     var machine: VZVirtualMachine?
     var state: DABuildState?
@@ -25,19 +23,12 @@ class DAVirtualMachine: NSObject, WireProtocol, VZVirtualMachineDelegate, @unche
 
     var inhibitStopForRestart = false
 
-    #if arch(arm64)
     init(_ configuration: DAVirtualMachineConfiguration, enableWireProtocol: Bool, enableInstallerMode: Bool, autoInstallerMode: Bool) {
         self.configuration = configuration
         self.enableWireProtocol = enableWireProtocol
         self.enableInstallerMode = enableInstallerMode
         self.autoInstallerMode = autoInstallerMode
     }
-    #else
-    init(_ configuration: DAVirtualMachineConfiguration, enableWireProtocol: Bool) {
-        self.configuration = configuration
-        self.enableWireProtocol = enableWireProtocol
-    }
-    #endif
 
     func create() async throws {
         writeProtocolEvent(StateEvent("create.start"))
@@ -56,7 +47,6 @@ class DAVirtualMachine: NSObject, WireProtocol, VZVirtualMachineDelegate, @unche
     func start() {
         writeProtocolEvent(StateEvent("runtime.starting"))
 
-        #if arch(arm64)
         var shouldInstallerMode = enableInstallerMode
         if autoInstallerMode {
             if !diskAllocatedStates.isEmpty,
@@ -71,11 +61,9 @@ class DAVirtualMachine: NSObject, WireProtocol, VZVirtualMachineDelegate, @unche
             doInstallMode()
             return
         }
-        #endif
         doActualStart()
     }
 
-    #if arch(arm64)
     private func doInstallMode() {
         DispatchQueue.main.async {
             let installer = VZMacOSInstaller(virtualMachine: self.machine!, restoringFromImageAt: self.state!.macRestoreImage!.url)
@@ -101,7 +89,6 @@ class DAVirtualMachine: NSObject, WireProtocol, VZVirtualMachineDelegate, @unche
             writeProtocolEvent(StateEvent("runtime.started"))
         }
     }
-    #endif
 
     private func doActualStart() {
         DispatchQueue.main.async {

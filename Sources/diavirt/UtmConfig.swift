@@ -47,7 +47,7 @@ struct UtmDisplayConfig: Codable {
 
 struct UtmDriveConfig: Codable {
     var identifier: String
-    var imageName: String
+    var imageName: String?
     var isNvme: Bool
     var isReadOnly: Bool
 
@@ -76,10 +76,12 @@ struct UtmInformationConfig: Codable {
 struct UtmNetworkConfig: Codable {
     var macAddress: String
     var mode: String
+    var bridgeInterface: String?
 
     enum CodingKeys: String, CodingKey {
         case macAddress = "MacAddress"
         case mode = "Mode"
+        case bridgeInterface = "BridgeInterface"
     }
 }
 

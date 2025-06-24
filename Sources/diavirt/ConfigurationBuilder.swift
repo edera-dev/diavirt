@@ -10,19 +10,15 @@ import Foundation
 import Virtualization
 
 class DABuildState {
-    #if arch(arm64)
     var macRestoreImage: VZMacOSRestoreImage?
-    #endif
 }
 
 extension DAVirtualMachineConfiguration {
     func preflight(wire: WireProtocol) async throws -> DABuildState {
         let state = DABuildState()
-        #if arch(arm64)
         if let macRestoreImage {
             state.macRestoreImage = try await macRestoreImage.preflight(wire: wire)
         }
-        #endif
         return state
     }
 
@@ -108,11 +104,9 @@ extension DABootLoader {
         }
         #endif
 
-        #if arch(arm64)
         if let macOSBootLoader {
             configuration.bootLoader = try macOSBootLoader.build()
         }
-        #endif
     }
 }
 
@@ -133,13 +127,11 @@ extension DALinuxBootLoader {
     }
 }
 
-#if arch(arm64)
 extension DAMacOSBootLoader {
     func build() throws -> VZMacOSBootLoader {
         VZMacOSBootLoader()
     }
 }
-#endif
 
 extension DAEFIVariableStore {
     func build() throws -> VZEFIVariableStore {
@@ -165,11 +157,9 @@ extension DAPlatform {
             configuration.platform = try genericPlatform.build()
         }
 
-        #if arch(arm64)
         if let macPlatform {
             configuration.platform = try macPlatform.build(state: state)
         }
-        #endif
     }
 }
 
@@ -192,16 +182,10 @@ extension DAGenericPlatform {
             machineIdentifier = VZGenericMachineIdentifier(dataRepresentation: machineIdentifierData)
         }
 
-        if #available(macOS 15.0, *) {
-            if enableNestedVirtualization == true, !VZGenericPlatformConfiguration.isNestedVirtualizationSupported {
-                fatalError("Nested virtualization is not supported.")
-            }
-            configuration.isNestedVirtualizationEnabled = enableNestedVirtualization ?? false
-        } else {
-            if enableNestedVirtualization == true {
-                fatalError("Nested virtualization is not supported.")
-            }
+        if enableNestedVirtualization == true, !VZGenericPlatformConfiguration.isNestedVirtualizationSupported {
+            fatalError("Nested virtualization is not supported.")
         }
+        configuration.isNestedVirtualizationEnabled = enableNestedVirtualization ?? false
 
         if let machineIdentifier {
             configuration.machineIdentifier = machineIdentifier
@@ -211,7 +195,6 @@ extension DAGenericPlatform {
     }
 }
 
-#if arch(arm64)
 extension DAMacPlatform {
     func build(state: DABuildState) throws -> VZMacPlatformConfiguration {
         let model: VZMacHardwareModel
@@ -257,7 +240,6 @@ extension DAMacPlatform {
         return platform
     }
 }
-#endif
 
 extension DAStorageDevice {
     func build(wire: WireProtocol) throws -> VZStorageDeviceConfiguration {
@@ -270,6 +252,10 @@ extension DAStorageDevice {
 
         if let networkBlockDeviceAttachment {
             attachment = try networkBlockDeviceAttachment.build()
+        }
+
+        if let nvmeBlockDevice {
+            storage = try nvmeBlockDevice.build(attachment: attachment!)
         }
 
         if let virtioBlockDevice {
@@ -332,7 +318,17 @@ extension DANetworkBlockDeviceAttachment {
 
 extension DAVirtioBlockDevice {
     func build(attachment: VZStorageDeviceAttachment) throws -> VZStorageDeviceConfiguration {
-        VZVirtioBlockDeviceConfiguration(attachment: attachment)
+        let configuration = VZVirtioBlockDeviceConfiguration(attachment: attachment)
+        if let blockDeviceIdentifier {
+            configuration.blockDeviceIdentifier = blockDeviceIdentifier
+        }
+        return configuration
+    }
+}
+
+extension DANvmeBlockDevice {
+    func build(attachment: VZStorageDeviceAttachment) throws -> VZStorageDeviceConfiguration {
+        VZNVMExpressControllerDeviceConfiguration(attachment: attachment)
     }
 }
 
@@ -465,6 +461,10 @@ extension DANetworkDevice {
             attachment = try natNetworkAttachment.build()
         }
 
+        if let bridgedNetworkAttachment {
+            attachment = try bridgedNetworkAttachment.build()
+        }
+
         if let virtioNetworkDevice {
             device = try virtioNetworkDevice.build()
         }
@@ -477,6 +477,17 @@ extension DANetworkDevice {
 extension DANATNetworkAttachment {
     func build() throws -> VZNATNetworkDeviceAttachment {
         VZNATNetworkDeviceAttachment()
+    }
+}
+
+extension DABridgedNetworkAttachment {
+    func build() throws -> VZBridgedNetworkDeviceAttachment {
+        guard let interface = VZBridgedNetworkInterface.networkInterfaces.first(where: {
+            $0.identifier == interface || $0.localizedDisplayName == interface
+        }) else {
+            fatalError("interface not found: \(interface)")
+        }
+        return VZBridgedNetworkDeviceAttachment(interface: interface)
     }
 }
 
@@ -649,16 +660,13 @@ extension DAUSBScreenCoordinatePointingDevice {
 
 extension DAStartOptions {
     func build() -> VZVirtualMachineStartOptions? {
-        #if arch(arm64)
         if let macOSStartOptions {
             return macOSStartOptions.build()
         }
-        #endif
         return nil
     }
 }
 
-#if arch(arm64)
 extension DAMacOSStartOptions {
     func build() -> VZMacOSVirtualMachineStartOptions {
         let options = VZMacOSVirtualMachineStartOptions()
@@ -721,4 +729,3 @@ extension DAFileMacOSRestoreImage {
         try await VZMacOSRestoreImage.image(from: URL(fileURLWithPath: restoreImagePath))
     }
 }
-#endif

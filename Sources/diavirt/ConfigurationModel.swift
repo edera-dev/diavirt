@@ -23,19 +23,13 @@ struct DAVirtualMachineConfiguration: Codable {
     let socketDevices: [DASocketDevice]?
     let keyboardDevices: [DAKeyboardDevice]?
     let pointingDevices: [DAPointingDevice]?
-    #if arch(arm64)
     let macRestoreImage: DAMacOSRestoreImage?
-    #endif
     let startOptions: DAStartOptions?
 }
 
 struct DABootLoader: Codable {
     let linuxBootLoader: DALinuxBootLoader?
-
-    #if arch(arm64)
     let macOSBootLoader: DAMacOSBootLoader?
-    #endif
-
     let efiBootLoader: DAEFIBootLoader?
 }
 
@@ -45,9 +39,7 @@ struct DALinuxBootLoader: Codable {
     let commandLine: String?
 }
 
-#if arch(arm64)
 struct DAMacOSBootLoader: Codable {}
-#endif
 
 struct DAEFIBootLoader: Codable {
     let efiVariableStore: DAEFIVariableStore
@@ -77,6 +69,7 @@ struct DAMacPlatform: Codable {
 
 struct DAStorageDevice: Codable {
     let virtioBlockDevice: DAVirtioBlockDevice?
+    let nvmeBlockDevice: DANvmeBlockDevice?
     let usbMassStorageDevice: DAUSBMassStorageDevice?
     let diskImageAttachment: DADiskImageAttachment?
     let networkBlockDeviceAttachment: DANetworkBlockDeviceAttachment?
@@ -93,7 +86,11 @@ struct DANetworkBlockDeviceAttachment: Codable {
     let isForcedReadOnly: Bool?
 }
 
-struct DAVirtioBlockDevice: Codable {}
+struct DAVirtioBlockDevice: Codable {
+    let blockDeviceIdentifier: String?
+}
+
+struct DANvmeBlockDevice: Codable {}
 
 struct DAUSBMassStorageDevice: Codable {}
 
@@ -136,6 +133,7 @@ struct DAVirtioTraditionalMemoryBalloonDevice: Codable {}
 struct DANetworkDevice: Codable {
     let virtioNetworkDevice: DAVirtioNetworkDevice?
     let natNetworkAttachment: DANATNetworkAttachment?
+    let bridgedNetworkAttachment: DABridgedNetworkAttachment?
 }
 
 struct DAVirtioNetworkDevice: Codable {
@@ -143,6 +141,10 @@ struct DAVirtioNetworkDevice: Codable {
 }
 
 struct DANATNetworkAttachment: Codable {}
+
+struct DABridgedNetworkAttachment: Codable {
+    let interface: String
+}
 
 struct DAGraphicsDevice: Codable {
     let macGraphicsDevice: DAMacGraphicsDevice?
@@ -203,17 +205,22 @@ struct DAVirtioSocketDevice: Codable {}
 
 struct DAKeyboardDevice: Codable {
     let usbKeyboardDevice: DAUSBKeyboardDevice?
+    let macKeyboardDevice: DAMacKeyboardDevice?
 }
 
 struct DAUSBKeyboardDevice: Codable {}
 
+struct DAMacKeyboardDevice: Codable {}
+
 struct DAPointingDevice: Codable {
     let usbScreenCoordinatePointingDevice: DAUSBScreenCoordinatePointingDevice?
+    let macTrackpadDevice: DAMacTrackpadDevice?
 }
 
 struct DAUSBScreenCoordinatePointingDevice: Codable {}
 
-#if arch(arm64)
+struct DAMacTrackpadDevice: Codable {}
+
 struct DAMacOSRestoreImage: Codable {
     let latestSupportedRestoreImage: DALatestSupportedMacOSRestoreImage?
     let fileRestoreImage: DAFileMacOSRestoreImage?
@@ -224,16 +231,11 @@ struct DALatestSupportedMacOSRestoreImage: Codable {}
 struct DAFileMacOSRestoreImage: Codable {
     let restoreImagePath: String
 }
-#endif
 
 struct DAStartOptions: Codable {
-    #if arch(arm64)
     var macOSStartOptions: DAMacOSStartOptions?
-    #endif
 }
 
-#if arch(arm64)
 struct DAMacOSStartOptions: Codable {
     var startUpFromMacOSRecovery: Bool?
 }
-#endif

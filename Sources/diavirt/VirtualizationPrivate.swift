@@ -9,24 +9,6 @@
 import Foundation
 import Virtualization
 
-#if arch(arm64)
-@objc protocol _VZAppleTouchScreenConfiguration {
-    init()
-}
-
-@objc protocol _VZUSBTouchScreenConfiguration {
-    init()
-}
-
-@objc protocol _VZMacKeyboardConfiguration {
-    init()
-}
-
-@objc protocol _VZMacTrackpadConfiguration {
-    init()
-}
-#endif
-
 @objc protocol _VZGDBDebugStubConfiguration {
     init(port: Int)
 }

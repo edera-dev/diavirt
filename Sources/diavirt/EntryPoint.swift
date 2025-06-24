@@ -34,7 +34,6 @@ struct DiavirtCommand: ParsableCommand {
     @Flag(name: .long, inversion: .prefixedEnableDisable, help: "Enable Terminal Raw Mode")
     var rawMode: Bool = true
 
-    #if arch(arm64)
     @Flag(name: .long, inversion: .prefixedEnableDisable, help: "Enable Installer Mode")
     var installerMode: Bool = false
 
@@ -49,7 +48,6 @@ struct DiavirtCommand: ParsableCommand {
         .long
     ])
     var cannedMac: Bool = false
-    #endif
 
     func run() throws {
         let configFileURL = URL(fileURLWithPath: configFilePath)
@@ -58,7 +56,6 @@ struct DiavirtCommand: ParsableCommand {
         var shouldRawMode = rawMode
         var shouldViewerMode = viewerMode
 
-        #if arch(arm64)
         if cannedMac {
             shouldEnableSignalPassing = false
             shouldRawMode = false
@@ -73,7 +70,6 @@ struct DiavirtCommand: ParsableCommand {
                 try encoded.write(to: configFileURL)
             }
         }
-        #endif
 
         let configuration: DAVirtualMachineConfiguration
         if let utmVmPath {
@@ -91,11 +87,7 @@ struct DiavirtCommand: ParsableCommand {
             configuration = try decoder.decode(DAVirtualMachineConfiguration.self, from: data)
         }
 
-        #if arch(arm64)
         Global.machine = DAVirtualMachine(configuration, enableWireProtocol: wireProtocol, enableInstallerMode: installerMode, autoInstallerMode: autoInstallerMode)
-        #else
-        Global.machine = DAVirtualMachine(configuration, enableWireProtocol: wireProtocol)
-        #endif
 
         Global.enableSignalPassing = shouldEnableSignalPassing
 

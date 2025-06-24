@@ -84,18 +84,18 @@
 		2A2A9C7027678B000006C500 /* diavirt */ = {
 			isa = PBXGroup;
 			children = (
-				FAD7E79A2E0A25FE00005495 /* UtmConfig.swift */,
-				FA28854E2E09297300FC3816 /* UtmCompatibility.swift */,
 				2A2A9C7827678B340006C500 /* diavirt.entitlements */,
+				2AAE43B127E9B4F0005A8EE0 /* CannedMac.swift */,
 				2A3190C9276972CE00D4B154 /* ConfigurationBuilder.swift */,
 				2A2A9C7C27678E3B0006C500 /* ConfigurationModel.swift */,
 				2A2A9C7127678B000006C500 /* EntryPoint.swift */,
 				2A7518EB276EAC560032FC8B /* TerminalMode.swift */,
+				FA28854E2E09297300FC3816 /* UtmCompatibility.swift */,
+				FAD7E79A2E0A25FE00005495 /* UtmConfig.swift */,
 				2A4EEF0B27690E9A00E7FA9F /* ViewerApplication.swift */,
+				2AD7152127EE151E00EDD14E /* VirtualizationPrivate.swift */,
 				2A2A9C7E27678ECF0006C500 /* VirtualMachine.swift */,
 				2A4EEF092768FC7300E7FA9F /* WireModel.swift */,
-				2AAE43B127E9B4F0005A8EE0 /* CannedMac.swift */,
-				2AD7152127EE151E00EDD14E /* VirtualizationPrivate.swift */,
 			);
 			path = diavirt;
 			sourceTree = "<group>";
@@ -139,7 +139,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1310;
-				LastUpgradeCheck = 1500;
+				LastUpgradeCheck = 1640;
 				TargetAttributes = {
 					2A2A9C6D27678B000006C500 = {
 						CreatedOnToolsVersion = 13.1;
@@ -226,6 +226,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 3FQW5YTQR8;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -243,7 +244,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -290,6 +291,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 3FQW5YTQR8;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -301,7 +303,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
@@ -313,17 +315,19 @@
 		2A2A9C7627678B000006C500 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD)";
+				ARCHS = arm64;
 				CODE_SIGN_ENTITLEMENTS = Sources/diavirt/diavirt.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 3FQW5YTQR8;
-				ENABLE_HARDENED_RUNTIME = YES;
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				ENABLE_HARDENED_RUNTIME = NO;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				OTHER_SWIFT_FLAGS = "-D DIAVIRT_USE_PRIVATE_APIS";
-				PRODUCT_BUNDLE_IDENTIFIER = gay.pizza.diavirt;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.edera.diavirt;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -331,16 +335,17 @@
 		2A2A9C7727678B000006C500 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD)";
+				ARCHS = arm64;
 				CODE_SIGN_ENTITLEMENTS = Sources/diavirt/diavirt.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 3FQW5YTQR8;
-				ENABLE_HARDENED_RUNTIME = YES;
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				ENABLE_HARDENED_RUNTIME = NO;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				OTHER_SWIFT_FLAGS = "-D DIAVIRT_USE_PRIVATE_APIS";
-				PRODUCT_BUNDLE_IDENTIFIER = gay.pizza.diavirt;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.edera.diavirt;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
