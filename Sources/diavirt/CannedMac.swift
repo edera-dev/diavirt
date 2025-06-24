@@ -74,7 +74,8 @@ func createCannedMac() -> DAVirtualMachineConfiguration {
                             isReadOnly: true
                         )
                     ),
-                    multipleDirectoryShare: nil
+                    multipleDirectoryShare: nil,
+                    rosettaDirectoryShare: nil,
                 )
             )
         ],

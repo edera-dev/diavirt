@@ -65,10 +65,21 @@ enum UtmCompatibility {
         var entropy: [DAEntropyDevice] = []
         var memoryBalloon: [DAMemoryBalloonDevice] = []
         var networks: [DANetworkDevice] = []
-        let directorySharing: [DADirectorySharingDevice] = []
+        var directorySharing: [DADirectorySharingDevice] = []
         let sockets: [DASocketDevice] = []
         var keyboards: [DAKeyboardDevice] = []
         var pointing: [DAPointingDevice] = []
+
+        if config.virtualization.rosettaEnabled == true {
+            directorySharing.append(DADirectorySharingDevice(
+                virtioFileSystemDevice: DAVirtioFileSystemDevice(tag: "rosetta"),
+                directoryShare: DADirectoryShare(
+                    singleDirectoryShare: nil,
+                    multipleDirectoryShare: nil,
+                    rosettaDirectoryShare: DARosettaDirectoryShare()
+                )
+            ))
+        }
 
         for drive in config.drives {
             var attachment: DADiskImageAttachment?

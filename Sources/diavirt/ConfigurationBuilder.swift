@@ -580,6 +580,10 @@ extension DADirectoryShare {
             share = try multipleDirectoryShare.build()
         }
 
+        if let rosettaDirectoryShare {
+            share = try rosettaDirectoryShare.build()
+        }
+
         return share!
     }
 }
@@ -594,6 +598,14 @@ extension DAMultipleDirectoryShare {
     func build() throws -> VZMultipleDirectoryShare {
         let shares = try directories.mapValues { directory in try directory.build() }
         return VZMultipleDirectoryShare(directories: shares)
+    }
+}
+
+extension DARosettaDirectoryShare {
+    func build() throws -> VZLinuxRosettaDirectoryShare {
+        let share = try VZLinuxRosettaDirectoryShare()
+        try? share.setCachingOptions(.defaultUnixSocket)
+        return share
     }
 }
 

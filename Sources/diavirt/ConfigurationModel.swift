@@ -182,6 +182,7 @@ struct DAVirtioFileSystemDevice: Codable {
 struct DADirectoryShare: Codable {
     let singleDirectoryShare: DASingleDirectoryShare?
     let multipleDirectoryShare: DAMultipleDirectoryShare?
+    let rosettaDirectoryShare: DARosettaDirectoryShare?
 }
 
 struct DASingleDirectoryShare: Codable {
@@ -191,6 +192,8 @@ struct DASingleDirectoryShare: Codable {
 struct DAMultipleDirectoryShare: Codable {
     let directories: [String: DASharedDirectory]
 }
+
+struct DARosettaDirectoryShare: Codable {}
 
 struct DASharedDirectory: Codable {
     let path: String
