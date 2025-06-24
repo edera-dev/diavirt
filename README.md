@@ -2,7 +2,20 @@
 
 diavirt implements all of the functionality of [Virtualization.framework](https://developer.apple.com/documentation/virtualization) in a command-line tool.
 
-## Usage
+## Simple Usage (UTM Compatibility)
+
+diavirt can run a UTM VM using the UTM comapatbility mode:
+
+```shell
+# Run the VM package named "Debian" with the viewer enabled
+$ diavirt -v -u Debian
+# Run the VM package named "Debian" in headless mode
+$ diavirt -u Debian
+# Run the VM package at the specified path in headless mode
+$ diavirt -u ~/some/path/to/test.utm
+```
+
+## Advanced Usage
 
 diavirt takes in a configuration file which describes how to build up the virtual machine configuration.
 
@@ -11,9 +24,7 @@ diavirt takes in a configuration file which describes how to build up the virtua
   "cpuCoreCount": 2,
   "memorySizeInBytes": 2147483648,
   "platform": {
-    "genericPlatform": {
-      "enableNestedVirtualization": true
-    }
+    "genericPlatform": {}
   },
   "bootLoader": {
     "efiBootLoader": {

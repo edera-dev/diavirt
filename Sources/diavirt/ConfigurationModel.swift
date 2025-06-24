@@ -63,12 +63,16 @@ struct DAPlatform: Codable {
 }
 
 struct DAGenericPlatform: Codable {
-    var enableNestedVirtualization: Bool = false
+    var enableNestedVirtualization: Bool? = false
+    var machineIdentifierPath: String?
+    var machineIdentifierData: Data?
 }
 
 struct DAMacPlatform: Codable {
     let auxiliaryStoragePath: String
-    let machineIdentifierPath: String
+    var machineIdentifierPath: String?
+    var machineIdentifierData: Data?
+    var hardwareModelData: Data?
 }
 
 struct DAStorageDevice: Codable {

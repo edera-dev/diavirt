@@ -176,16 +176,37 @@ extension DAPlatform {
 extension DAGenericPlatform {
     func build() throws -> VZGenericPlatformConfiguration {
         let configuration = VZGenericPlatformConfiguration()
+
+        var machineIdentifier: VZGenericMachineIdentifier?
+
+        if let machineIdentifierPath {
+            if FileManager.default.fileExists(atPath: machineIdentifierPath) {
+                let data = try Data(contentsOf: URL(fileURLWithPath: machineIdentifierPath))
+                machineIdentifier = VZGenericMachineIdentifier(dataRepresentation: data)
+            } else {
+                machineIdentifier = VZGenericMachineIdentifier()
+                let dataToSave = machineIdentifier!.dataRepresentation
+                try dataToSave.write(to: URL(fileURLWithPath: machineIdentifierPath))
+            }
+        } else if let machineIdentifierData {
+            machineIdentifier = VZGenericMachineIdentifier(dataRepresentation: machineIdentifierData)
+        }
+
         if #available(macOS 15.0, *) {
-            if enableNestedVirtualization, !VZGenericPlatformConfiguration.isNestedVirtualizationSupported {
+            if enableNestedVirtualization == true, !VZGenericPlatformConfiguration.isNestedVirtualizationSupported {
                 fatalError("Nested virtualization is not supported.")
             }
-            configuration.isNestedVirtualizationEnabled = enableNestedVirtualization
+            configuration.isNestedVirtualizationEnabled = enableNestedVirtualization ?? false
         } else {
-            if enableNestedVirtualization {
+            if enableNestedVirtualization == true {
                 fatalError("Nested virtualization is not supported.")
             }
         }
+
+        if let machineIdentifier {
+            configuration.machineIdentifier = machineIdentifier
+        }
+
         return configuration
     }
 }
@@ -193,10 +214,18 @@ extension DAGenericPlatform {
 #if arch(arm64)
 extension DAMacPlatform {
     func build(state: DABuildState) throws -> VZMacPlatformConfiguration {
-        let restoreImage = state.macRestoreImage!
-        let configuration = restoreImage.mostFeaturefulSupportedConfiguration!
-        let model = configuration.hardwareModel
+        let model: VZMacHardwareModel
+
+        if let hardwareModelData {
+            model = VZMacHardwareModel(dataRepresentation: hardwareModelData)!
+        } else {
+            let restoreImage = state.macRestoreImage!
+            let configuration = restoreImage.mostFeaturefulSupportedConfiguration!
+            model = configuration.hardwareModel
+        }
+
         let platform = VZMacPlatformConfiguration()
+
         let auxilaryStorageURL = URL(fileURLWithPath: auxiliaryStoragePath)
         let auxilaryStorage: VZMacAuxiliaryStorage = if !FileManager.default.fileExists(atPath: auxiliaryStoragePath) {
             try VZMacAuxiliaryStorage(creatingStorageAt: auxilaryStorageURL, hardwareModel: model, options: .allowOverwrite)
@@ -205,17 +234,22 @@ extension DAMacPlatform {
         }
 
         var machineIdentifier: VZMacMachineIdentifier?
-        if FileManager.default.fileExists(atPath: machineIdentifierPath) {
-            let data = try Data(contentsOf: URL(fileURLWithPath: machineIdentifierPath))
-            machineIdentifier = VZMacMachineIdentifier(dataRepresentation: data)
-        } else {
-            machineIdentifier = VZMacMachineIdentifier()
-            let dataToSave = machineIdentifier!.dataRepresentation
-            try dataToSave.write(to: URL(fileURLWithPath: machineIdentifierPath))
+
+        if let machineIdentifierPath {
+            if FileManager.default.fileExists(atPath: machineIdentifierPath) {
+                let data = try Data(contentsOf: URL(fileURLWithPath: machineIdentifierPath))
+                machineIdentifier = VZMacMachineIdentifier(dataRepresentation: data)
+            } else {
+                machineIdentifier = VZMacMachineIdentifier()
+                let dataToSave = machineIdentifier!.dataRepresentation
+                try dataToSave.write(to: URL(fileURLWithPath: machineIdentifierPath))
+            }
+        } else if let machineIdentifierData {
+            machineIdentifier = VZMacMachineIdentifier(dataRepresentation: machineIdentifierData)
         }
 
         platform.auxiliaryStorage = auxilaryStorage
-        platform.hardwareModel = configuration.hardwareModel
+        platform.hardwareModel = model
 
         if let machineIdentifier {
             platform.machineIdentifier = machineIdentifier

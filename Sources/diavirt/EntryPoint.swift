@@ -19,6 +19,9 @@ struct DiavirtCommand: ParsableCommand {
     @Option(name: .shortAndLong, help: "Configuration File Path")
     var configFilePath: String = "vm.json"
 
+    @Option(name: .shortAndLong, help: "UTM VM Path or Name")
+    var utmVmPath: String?
+
     @Flag(name: .shortAndLong, help: "Enable Viewer Mode")
     var viewerMode: Bool = false
 
@@ -72,9 +75,21 @@ struct DiavirtCommand: ParsableCommand {
         }
         #endif
 
-        let data = try Data(contentsOf: configFileURL)
-        let decoder = JSONDecoder()
-        let configuration = try decoder.decode(DAVirtualMachineConfiguration.self, from: data)
+        let configuration: DAVirtualMachineConfiguration
+        if let utmVmPath {
+            guard let url = UtmCompatibility.url(path: utmVmPath) else {
+                fatalError("failed to parse UTM VM '\(utmVmPath)' as a url")
+            }
+
+            guard let config = try UtmCompatibility.configuration(for: url) else {
+                fatalError("failed to convert UTM configuration to diavirt configuration")
+            }
+            configuration = config
+        } else {
+            let data = try Data(contentsOf: configFileURL)
+            let decoder = JSONDecoder()
+            configuration = try decoder.decode(DAVirtualMachineConfiguration.self, from: data)
+        }
 
         #if arch(arm64)
         Global.machine = DAVirtualMachine(configuration, enableWireProtocol: wireProtocol, enableInstallerMode: installerMode, autoInstallerMode: autoInstallerMode)
@@ -122,8 +137,6 @@ struct DiavirtCommand: ParsableCommand {
                 Task {
                     if state == .error {
                         DiavirtCommand.exit(withError: ExitCode.failure)
-                    } else if state == .stopped {
-                        // DiavirtCommand.exit(withError: ExitCode.success)
                     }
                 }
             }
