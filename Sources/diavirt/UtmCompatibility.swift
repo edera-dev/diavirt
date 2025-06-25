@@ -34,8 +34,20 @@ enum UtmCompatibility {
         let bootLoader: DABootLoader
         let platform: DAPlatform
         var graphic: DAGraphicsDevice?
-        if let genericPlatform = config.system.genericPlatform {
-            platform = DAPlatform(genericPlatform: DAGenericPlatform(enableNestedVirtualization: nil, machineIdentifierPath: nil, machineIdentifierData: genericPlatform.machineIdentifier), macPlatform: nil)
+        if let macPlatform = config.system.macPlatform {
+            let auxiliaryStoragePath = Self.dataPath(for: macPlatform.auxiliaryStoragePath, vm: vm)
+            platform = DAPlatform(genericPlatform: nil, macPlatform: DAMacPlatform(auxiliaryStoragePath: auxiliaryStoragePath, hardwareModelData: macPlatform.hardwareModel))
+            bootLoader = DABootLoader(linuxBootLoader: nil, macOSBootLoader: DAMacOSBootLoader(), efiBootLoader: nil)
+
+            graphic = DAGraphicsDevice(macGraphicsDevice: DAMacGraphicsDevice(displays: config.displays.map {
+                DAMacGraphicsDisplay(widthInPixels: $0.widthPixels, heightInPixels: $0.heightPixels, pixelsPerInch: $0.pixelsPerInch)
+            }), virtioGraphicsDevice: nil)
+        } else {
+            if let genericPlatform = config.system.genericPlatform {
+                platform = DAPlatform(genericPlatform: DAGenericPlatform(enableNestedVirtualization: nil, machineIdentifierPath: nil, machineIdentifierData: genericPlatform.machineIdentifier), macPlatform: nil)
+            } else {
+                platform = DAPlatform(genericPlatform: DAGenericPlatform(enableNestedVirtualization: nil, machineIdentifierPath: nil, machineIdentifierData: nil), macPlatform: nil)
+            }
 
             if config.system.boot.uefiBoot {
                 let efiPath = Self.dataPath(for: config.system.boot.efiVariableStoragePath ?? "efi_vars.fd", vm: vm)
@@ -48,16 +60,6 @@ enum UtmCompatibility {
             graphic = DAGraphicsDevice(macGraphicsDevice: nil, virtioGraphicsDevice: DAVirtioGraphicsDevice(scanouts: config.displays.map {
                 DAVirtioGraphicsScanout(widthInPixels: $0.widthPixels, heightInPixels: $0.heightPixels)
             }))
-        } else if let macPlatform = config.system.macPlatform {
-            let auxiliaryStoragePath = Self.dataPath(for: macPlatform.auxiliaryStoragePath, vm: vm)
-            platform = DAPlatform(genericPlatform: nil, macPlatform: DAMacPlatform(auxiliaryStoragePath: auxiliaryStoragePath, hardwareModelData: macPlatform.hardwareModel))
-            bootLoader = DABootLoader(linuxBootLoader: nil, macOSBootLoader: DAMacOSBootLoader(), efiBootLoader: nil)
-
-            graphic = DAGraphicsDevice(macGraphicsDevice: DAMacGraphicsDevice(displays: config.displays.map {
-                DAMacGraphicsDisplay(widthInPixels: $0.widthPixels, heightInPixels: $0.heightPixels, pixelsPerInch: $0.pixelsPerInch)
-            }), virtioGraphicsDevice: nil)
-        } else {
-            fatalError("unknown platform")
         }
 
         var storage: [DAStorageDevice] = []
