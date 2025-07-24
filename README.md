@@ -4,7 +4,7 @@ diavirt implements all of the functionality of [Virtualization.framework](https:
 
 ## Simple Usage (UTM Compatibility)
 
-diavirt can run a UTM VM using the UTM comapatbility mode:
+diavirt can run a UTM VM using the UTM compatibility mode:
 
 ```shell
 # Run the VM package named "Debian" with the viewer enabled
