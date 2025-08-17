@@ -99,7 +99,7 @@ enum UtmCompatibility {
                 continue
             }
 
-            if drive.isNvme {
+            if drive.isNvme && config.system.genericPlatform != nil {
                 storage.append(DAStorageDevice(
                     virtioBlockDevice: nil,
                     nvmeBlockDevice: DANvmeBlockDevice(),
